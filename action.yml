@@ -1,5 +1,8 @@
 name: 'setup-homeassistant'
 description: 'Setup a Home Assistant container for testing'
+branding:
+  icon: "terminal"
+  color: "gray-dark"
 inputs:
   tag:
     description: 'The tag of Home Assistant to use'
