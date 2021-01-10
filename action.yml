@@ -17,18 +17,18 @@ inputs:
     required: false
     default: 360
 outputs:
-  url: 
+  url:
     description: "The URL that the test container is running on"
     value: ${{ steps.run.outputs.url }}
-  containername: 
+  containername:
     description: "The container name for the running container"
     value: ${{ steps.init.outputs.containername }}
-  token:  
+  token:
     description: "A LLAT that can be used for authentication"
     value: ${{ steps.user.outputs.token }}
 runs:
   using: "composite"
-  steps: 
+  steps:
     - shell: bash
       id: init
       run: |
@@ -93,8 +93,8 @@ runs:
           set +e
           echo "Waiting for Home Assistant to start"
           while true; do
-            STATUS=$(curl -sSL "$BASE_URL/api/discovery_info" | jq -r .requires_api_password)
-            if [ "$STATUS" == "true" ]; then
+            STATUS=$(curl -sSL -H "Authorization: Bearer ${{ steps.user.outputs.token }}" "$BASE_URL/api/config" | jq -r .state)
+            if [ "$STATUS" == "RUNNING" ]; then
               break
             elif [ "$RETRIES" == "${{inputs.retry-limit}}" ]; then
               echo "Failed to start"
