@@ -1,0 +1,61 @@
+name: Self
+
+on:
+  pull_request:
+    branches: 
+    - main
+  push:
+    branches: 
+    - main
+
+jobs:
+  without-config-dir:
+    name: Without config-dir
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+
+      - name: ✅ Verify API Access
+        run: | 
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
+  with-config-dir:
+    name: With config-dir
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        channel:
+          - stable
+          - beta
+          - dev
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+        with:
+          tag: ${{ matrix.channel }}
+          config-dir: test_configuration
+
+      - name: ✅ Verify API Access
+        run: | 
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}

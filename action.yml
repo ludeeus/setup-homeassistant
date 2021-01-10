@@ -1,0 +1,104 @@
+name: 'setup-homeassistant'
+description: 'Setup a Home Assistant container for testing'
+inputs:
+  tag:
+    description: 'The tag of Home Assistant to use'
+    required: false
+    default: 'dev'
+  config-dir:
+    description: 'Path to the config dir to be used'
+    required: false
+    default: ''
+  retry-limit:
+    description: 'number of maximum retries'
+    required: false
+    default: 360
+outputs:
+  url: 
+    description: "The URL that the test container is running on"
+    value: ${{ steps.run.outputs.url }}
+  containername: 
+    description: "The container name for the running container"
+    value: ${{ steps.init.outputs.containername }}
+  token:  
+    description: "A LLAT that can be used for authentication"
+    value: ${{ steps.user.outputs.token }}
+runs:
+  using: "composite"
+  steps: 
+    - shell: bash
+      id: init
+      run: |
+        containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
+
+        mkdir /tmp/combined_configuration
+        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
+
+        docker pull homeassistant/home-assistant:${{ inputs.tag }} 2>&1 >/dev/null
+
+        echo "::set-output name=containername::$containername"
+        echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
+
+    - shell: bash
+      run: |
+        echo "Verifying confgiuration"
+        if [ ! -f /tmp/combined_configuration/confgiuration.yaml ]; then
+          docker run --rm \
+            -v /tmp/combined_configuration:/config \
+            homeassistant/home-assistant:${{ inputs.tag }} \
+            /usr/local/bin/hass --script ensure_config -c /config
+        fi
+        docker run --rm \
+          -v /tmp/combined_configuration:/config \
+          homeassistant/home-assistant:${{ inputs.tag }} \
+          /usr/local/bin/hass --script check_config -c /config
+
+    - shell: bash
+      run: |
+        docker run --rm \
+          -v /tmp/combined_configuration:/config \
+          homeassistant/home-assistant:${{ inputs.tag }} \
+          /usr/local/bin/hass --version -c /config
+
+    - shell: bash
+      id: user
+      run: |
+        echo "Creating authentication"
+        TOKEN=$(docker run --rm \
+          -v /tmp/combined_configuration:/config \
+          -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
+          homeassistant/home-assistant:${{ inputs.tag }} \
+          python3 /tmp/create_token.py)
+        echo "::set-output name=token::$TOKEN"
+
+    - shell: bash
+      run: |
+        docker run -d \
+          --network=host \
+          --name ${{ steps.init.outputs.containername }} \
+          -v /tmp/combined_configuration:/config \
+          homeassistant/home-assistant:${{ inputs.tag }}
+
+    - shell: bash
+      id: run
+      run: |
+          BASE_URL="http://127.0.0.1:8123"
+          echo "::set-output name=url::$BASE_URL"
+
+          STATUS="false"
+          RETRIES=1
+          set +e
+          echo "Waiting for Home Assistant to start"
+          while true; do
+            STATUS=$(curl -sSL "$BASE_URL/api/discovery_info" | jq -r .requires_api_password)
+            if [ "$STATUS" == "true" ]; then
+              break
+            elif [ "$RETRIES" == "${{inputs.retry-limit}}" ]; then
+              echo "Failed to start"
+              docker logs ${{ steps.init.outputs.containername }}
+              exit 1
+            fi
+            sleep 1
+            RETRIES=$(( $RETRIES + 1 ))
+          done
+          set -e
