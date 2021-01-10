@@ -1,4 +1,4 @@
-name: Actions
+name: Self
 
 on:
   pull_request:
@@ -12,12 +12,6 @@ jobs:
   without-config-dir:
     name: Without config-dir
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        channel:
-          - stable
-          - beta
-          - dev
     steps:
       - name: 📥 Check out the repository
         uses: actions/checkout@v2
@@ -25,8 +19,6 @@ jobs:
       - name: 👷 Setup Home Assistant
         id: homeassistant
         uses: ./
-        with:
-          tag: ${{ matrix.channel }}
 
       - name: ✅ Verify API Access
         run: | 
