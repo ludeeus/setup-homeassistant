@@ -93,7 +93,7 @@ runs:
           set +e
           echo "Waiting for Home Assistant to start"
           while true; do
-            STATUS=$(curl -sSL "$BASE_URL/api/config" | jq -r .state)
+            STATUS=$(curl -sSL -H "Authorization: Bearer ${{ steps.user.outputs.token }}" "$BASE_URL/api/config" | jq -r .state)
             if [ "$STATUS" == "RUNNING" ]; then
               break
             elif [ "$RETRIES" == "${{inputs.retry-limit}}" ]; then
