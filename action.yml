@@ -16,6 +16,9 @@ inputs:
     description: 'number of maximum retries'
     required: false
     default: 360
+  test:
+    description: For testing
+    required: fasle
 outputs:
   url:
     description: "The URL that the test container is running on"
@@ -32,6 +35,7 @@ runs:
     - shell: bash
       id: init
       run: |
+        echo ${{ inputs.test }}
         containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
 
         mkdir /tmp/combined_configuration

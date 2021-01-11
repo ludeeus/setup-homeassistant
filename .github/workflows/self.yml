@@ -2,10 +2,10 @@ name: Self
 
 on:
   pull_request:
-    branches: 
+    branches:
     - main
   push:
-    branches: 
+    branches:
     - main
 
 jobs:
@@ -19,9 +19,13 @@ jobs:
       - name: 👷 Setup Home Assistant
         id: homeassistant
         uses: ./
+        with:
+          test:
+            - name: one
+              desc: two
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
@@ -51,7 +55,7 @@ jobs:
           config-dir: test_configuration
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
