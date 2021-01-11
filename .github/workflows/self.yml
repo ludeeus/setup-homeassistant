@@ -20,9 +20,7 @@ jobs:
         id: homeassistant
         uses: ./
         with:
-          test:
-            - name: one
-              desc: two
+          test: [{"name": "one", "desc": "two"}]
 
       - name: ✅ Verify API Access
         run: |
