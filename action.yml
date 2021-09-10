@@ -42,10 +42,10 @@ runs:
         if [[ "$tag" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/dev.json"
-        elsif [[ "$tag" == "beta" ]]; then
+        elif [[ "$tag" == "beta" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/beta.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/beta.json"
-        elsif [[ "$tag" == "stable" ]]; then
+        elif [[ "$tag" == "stable" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/stable.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/stable.json"
         fi
