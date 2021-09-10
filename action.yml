@@ -37,8 +37,22 @@ runs:
         mkdir /tmp/combined_configuration
         cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
 
-        docker pull homeassistant/home-assistant:${{ inputs.tag }} 2>&1 >/dev/null
+        tag="${{ inputs.tag }}"
 
+        if [[ "$tag" == "dev" ]]; then
+          tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
+          echo "Using $tag from https://version.home-assistant.io/dev.json"
+        elsif [[ "$tag" == "beta" ]]; then
+          tag=$(curl -sSLf https://version.home-assistant.io/beta.json | jq .homeassistant.default -r)
+          echo "Using $tag from https://version.home-assistant.io/beta.json"
+        elsif [[ "$tag" == "stable" ]]; then
+          tag=$(curl -sSLf https://version.home-assistant.io/stable.json | jq .homeassistant.default -r)
+          echo "Using $tag from https://version.home-assistant.io/stable.json"
+        fi
+
+        docker pull "homeassistant/home-assistant:$tag" 2>&1 >/dev/null
+
+        echo "::set-output name=tag::$tag"
         echo "::set-output name=containername::$containername"
         echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
 
@@ -48,19 +62,19 @@ runs:
         if [ ! -f /tmp/combined_configuration/confgiuration.yaml ]; then
           docker run --rm \
             -v /tmp/combined_configuration:/config \
-            homeassistant/home-assistant:${{ inputs.tag }} \
+            homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
             /usr/local/bin/hass --script ensure_config -c /config
         fi
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ inputs.tag }} \
+          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
           /usr/local/bin/hass --script check_config -c /config
 
     - shell: bash
       run: |
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ inputs.tag }} \
+          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
           /usr/local/bin/hass --version -c /config
 
     - shell: bash
@@ -70,7 +84,7 @@ runs:
         TOKEN=$(docker run --rm \
           -v /tmp/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
-          homeassistant/home-assistant:${{ inputs.tag }} \
+          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
           python3 /tmp/create_token.py)
         echo "::set-output name=token::$TOKEN"
 
@@ -80,7 +94,7 @@ runs:
           --network=host \
           --name ${{ steps.init.outputs.containername }} \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ inputs.tag }}
+          homeassistant/home-assistant:${{ steps.init.outputs.tag }}
 
     - shell: bash
       id: run
