@@ -37,17 +37,17 @@ runs:
         mkdir /tmp/combined_configuration
         cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
 
-        tag="${{ inputs.tag }}"
-
-        if [[ "$tag" == "dev" ]]; then
+        if [[ "${{ inputs.tag }}" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/dev.json"
-        elif [[ "$tag" == "beta" ]]; then
+        elif [[ "${{ inputs.tag }}" == "beta" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/beta.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/beta.json"
-        elif [[ "$tag" == "stable" ]]; then
+        elif [[ "${{ inputs.tag }}" == "stable" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/stable.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/stable.json"
+        else
+          tag="${{ inputs.tag }}"
         fi
 
         docker pull "homeassistant/home-assistant:$tag" 2>&1 >/dev/null
