@@ -50,7 +50,7 @@ runs:
           tag="${{ inputs.tag }}"
         fi
 
-        docker pull "homeassistant/home-assistant:$tag" 2>&1 >/dev/null
+        docker pull "ghcr.io/home-assistant/amd64-homeassistant:$tag" 2>&1 >/dev/null
 
         echo "::set-output name=tag::$tag"
         echo "::set-output name=containername::$containername"
@@ -62,19 +62,19 @@ runs:
         if [ ! -f /tmp/combined_configuration/confgiuration.yaml ]; then
           docker run --rm \
             -v /tmp/combined_configuration:/config \
-            homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
+            ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
             /usr/local/bin/hass --script ensure_config -c /config
         fi
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
           /usr/local/bin/hass --script check_config -c /config
 
     - shell: bash
       run: |
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
           /usr/local/bin/hass --version -c /config
 
     - shell: bash
@@ -84,7 +84,7 @@ runs:
         TOKEN=$(docker run --rm \
           -v /tmp/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
-          homeassistant/home-assistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
           python3 /tmp/create_token.py)
         echo "::set-output name=token::$TOKEN"
 
@@ -94,7 +94,7 @@ runs:
           --network=host \
           --name ${{ steps.init.outputs.containername }} \
           -v /tmp/combined_configuration:/config \
-          homeassistant/home-assistant:${{ steps.init.outputs.tag }}
+          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }}
 
     - shell: bash
       id: run
