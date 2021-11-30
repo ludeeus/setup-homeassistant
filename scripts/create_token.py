@@ -27,7 +27,7 @@ async def create_token():
     username = "".join(random.choice(string.ascii_lowercase) for i in range(32))
     password = "".join(random.choice(string.ascii_lowercase) for i in range(32))
     provider.data.add_auth(username, password)
-    user = await hass.auth.async_create_user(username, ["system-admin"])
+    user = await hass.auth.async_create_user(username, group_ids=["system-admin"])
     await hass.auth.async_update_user(user, is_active=True)
 
     ## Create token
