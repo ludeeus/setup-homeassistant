@@ -35,7 +35,7 @@ runs:
         containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
 
         mkdir /tmp/combined_configuration
-        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
+        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
 
         if [[ "${{ inputs.tag }}" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
@@ -55,6 +55,14 @@ runs:
         echo "::set-output name=tag::$tag"
         echo "::set-output name=containername::$containername"
         echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
+
+    - shell: bash
+      run: |
+        # Workaround for https://github.com/psf/requests/pull/6169
+        docker run --rm \
+          -v /tmp/combined_configuration:/config \
+          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
+          /usr/local/bin/pip install charset-normalizer==2.0.12
 
     - shell: bash
       run: |
