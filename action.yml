@@ -58,15 +58,6 @@ runs:
 
     - shell: bash
       run: |
-        # Workaround for https://github.com/psf/requests/pull/6169
-        docker run --rm \
-          -v /tmp/combined_configuration:/config \
-          ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
-          /usr/local/bin/pip install charset-normalizer==2.0.12 --target=/config
-        ls /tmp/combined_configuration
-
-    - shell: bash
-      run: |
         echo "Verifying confgiuration"
         if [ ! -f /tmp/combined_configuration/confgiuration.yaml ]; then
           docker run --rm \
@@ -77,7 +68,7 @@ runs:
         docker run --rm \
           -v /tmp/combined_configuration:/config \
           ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
-          /usr/local/bin/hass --script check_config -c /config
+          /bin/bash -c "pip install charset-normalizer==2.0.12; hass --script check_config -c /config"
 
     - shell: bash
       run: |
