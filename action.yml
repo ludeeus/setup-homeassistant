@@ -63,7 +63,7 @@ runs:
           -v /tmp/combined_configuration:/config \
           ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
           /usr/local/bin/pip install charset-normalizer==2.0.12 --target=/config/deps
-        ls /config/deps
+        ls /tmp/combined_configuration/deps
 
     - shell: bash
       run: |
