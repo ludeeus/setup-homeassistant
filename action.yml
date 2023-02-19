@@ -35,7 +35,7 @@ runs:
         containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
 
         mkdir /tmp/combined_configuration
-        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
+        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
 
         if [[ "${{ inputs.tag }}" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
@@ -52,8 +52,8 @@ runs:
 
         docker pull "ghcr.io/home-assistant/amd64-homeassistant:$tag" 2>&1 >/dev/null
 
-        echo "::set-output name=tag::$tag"
-        echo "::set-output name=containername::$containername"
+        echo "tag::$tag" >> $GITHUB_OUTPUT
+        echo "containername=$containername" >> $GITHUB_OUTPUT
         echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
 
     - shell: bash
@@ -86,7 +86,7 @@ runs:
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
           ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
           python3 /tmp/create_token.py)
-        echo "::set-output name=token::$TOKEN"
+        echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
     - shell: bash
       run: |
@@ -100,7 +100,7 @@ runs:
       id: run
       run: |
           BASE_URL="http://127.0.0.1:8123"
-          echo "::set-output name=url::$BASE_URL"
+          echo "url=$BASE_URL" >> $GITHUB_OUTPUT
 
           STATUS="false"
           RETRIES=1
