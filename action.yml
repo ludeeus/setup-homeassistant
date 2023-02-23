@@ -75,7 +75,7 @@ runs:
         docker run --rm \
           -v /tmp/combined_configuration:/config \
           ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
-          /usr/local/bin/hass --version -c /config
+          /bin/bash -c "pip install 'charset-normalizer<3,>=2'; hass --version -c /config"
 
     - shell: bash
       id: user
