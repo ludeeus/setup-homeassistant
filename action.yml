@@ -59,16 +59,16 @@ runs:
     - shell: bash
       run: |
         echo "Verifying confgiuration"
-        if [ ! -f /tmp/combined_configuration/confgiuration.yaml ]; then
+        if [ ! -f /tmp/combined_configuration/configuration.yaml ]; then
           docker run --rm \
             -v /tmp/combined_configuration:/config \
             ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
-            /usr/local/bin/bash -c "pip install charset-normalizer<3,>=2; hass --script ensure_config -c /config"
+            /bin/bash -c "pip install charset-normalizer<3,>=2; hass --script ensure_config -c /config"
         fi
         docker run --rm \
           -v /tmp/combined_configuration:/config \
           ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }} \
-          /usr/local/bin/bash -c "pip install charset-normalizer<3,>=2; hass --script check_config -c /config"
+          /bin/bash -c "pip install charset-normalizer<3,>=2; hass --script check_config -c /config"
 
     - shell: bash
       run: |
