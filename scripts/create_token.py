@@ -9,6 +9,7 @@ from homeassistant import runner
 from homeassistant.auth import auth_manager_from_config
 from homeassistant.auth.models import TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN
 from homeassistant.core import HomeAssistant
+from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 CONFIG_DIR = "/config"
 
@@ -21,6 +22,7 @@ async def create_token():
         hass.config.config_dir = CONFIG_DIR
     except TypeError:
         hass = HomeAssistant(CONFIG_DIR)
+    await asyncio.gather(dr.async_load(hass), er.async_load(hass))
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
     hass.auth._store._set_defaults()
     provider = hass.auth.auth_providers[0]
