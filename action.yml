@@ -56,9 +56,31 @@ runs:
         echo "containername=$containername" >> $GITHUB_OUTPUT
         echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
 
+    - name: Restore image cache
+      id: restore_cache
+      uses: actions/cache@v4.2.3
+      with:
+        path: 'action/cache/docker'
+        key: '${{ github.repository }}-cache-docker-amd64-homeassistant-${{ steps.init.outputs.tag }}'
+
+    - name: Update image cache on cache miss
+      if: steps.restore_cache.outputs.cache-hit != 'true'
+      shell: bash
+      run: >
+        docker pull "ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }}" 2>&1 >/dev/null
+        && mkdir -p $(dirname './action/cache/docker/${{ steps.init.outputs.tag }}.tar')
+        && docker image save 'ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }}' \
+          --output './action/cache/docker/${{ steps.init.outputs.tag }}.tar'
+
+    - name: Use image cache on cache hit
+      if: steps.restore_cache.outputs.cache-hit == 'true'
+      shell: bash
+      run: >
+        docker image load --input './action/cache/docker/${{ steps.init.outputs.tag }}.tar'
+
     - shell: bash
       run: |
-        echo "Verifying confgiuration"
+        echo "Verifying configuration"
         if [ ! -f /tmp/combined_configuration/configuration.yaml ]; then
           docker run --rm \
             -v /tmp/combined_configuration:/config \
