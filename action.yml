@@ -34,8 +34,11 @@ runs:
       run: |
         containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
 
-        mkdir /tmp/combined_configuration
-        cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. /tmp/combined_configuration
+        mkdir ${{ github.action_path }}/combined_configuration
+
+        if [[ "${{ inputs.config-dir }}" != "" ]]; then
+          cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. ${{ github.action_path }}/combined_configuration
+        fi
 
         if [[ "${{ inputs.tag }}" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
@@ -59,21 +62,21 @@ runs:
     - shell: bash
       run: |
         echo "Verifying confgiuration"
-        if [ ! -f /tmp/combined_configuration/configuration.yaml ]; then
+        if [ ! -f ${{ github.action_path }}/combined_configuration/configuration.yaml ]; then
           docker run --rm \
-            -v /tmp/combined_configuration:/config \
+            -v ${{ github.action_path }}/combined_configuration:/config \
             ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
             /bin/bash -c "hass --script ensure_config -c /config"
         fi
         docker run --rm \
-          -v /tmp/combined_configuration:/config \
+          -v ${{ github.action_path }}/combined_configuration:/config \
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "hass --script check_config -c /config"
 
     - shell: bash
       run: |
         docker run --rm \
-          -v /tmp/combined_configuration:/config \
+          -v ${{ github.action_path }}/combined_configuration:/config \
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "hass --version -c /config"
 
@@ -82,7 +85,7 @@ runs:
       run: |
         echo "Creating authentication"
         TOKEN=$(docker run --rm \
-          -v /tmp/combined_configuration:/config \
+          -v ${{ github.action_path }}/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           python3 /tmp/create_token.py)
@@ -93,7 +96,7 @@ runs:
         docker run -d \
           --network=host \
           --name ${{ steps.init.outputs.containername }} \
-          -v /tmp/combined_configuration:/config \
+          -v ${{ github.action_path }}/combined_configuration:/config \
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}
 
     - shell: bash
