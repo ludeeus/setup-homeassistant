@@ -65,8 +65,8 @@ runs:
       id: restore_cache
       uses: actions/cache@v4.2.3
       with:
-        path: '${{ github.action_path }}/cache/docker'
-        key: '${{ runner.arch }}-cache-docker-homeassistant-${{ steps.init.outputs.tag }}'
+        path: 'cache/docker'
+        key: 'docker-homeassistant-${{ steps.init.outputs.tag }}-${{ runner.arch }}'
 
     - name: Update image cache on cache miss
       if: steps.restore_cache.outputs.cache-hit != 'true'
