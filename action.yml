@@ -57,8 +57,6 @@ runs:
           tag="${CONTAINER_TAG}"
         fi
 
-        docker pull "ghcr.io/home-assistant/home-assistant:$tag" 2>&1 >/dev/null
-
         echo "tag=$tag" >> $GITHUB_OUTPUT
         echo "containername=$containername" >> $GITHUB_OUTPUT
         echo "HOMEASSISTANT_CONTAINER_NAME=$containername" >> $GITHUB_ENV
