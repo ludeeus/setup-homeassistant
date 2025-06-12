@@ -65,7 +65,7 @@ runs:
 
     - shell: bash
       run: |
-        echo "Verifying confgiuration"
+        echo "Verifying configuration"
         if [ ! -f ${{ github.action_path }}/combined_configuration/configuration.yaml ]; then
           docker run --rm \
             -v ${{ github.action_path }}/combined_configuration:/config \
@@ -83,8 +83,6 @@ runs:
           -v ${{ github.action_path }}/combined_configuration:/config \
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "hass --version -c /config"
-
-        ls -la ${{ github.action_path }}/combined_configuration
 
     - shell: bash
       id: user
