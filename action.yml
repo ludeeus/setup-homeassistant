@@ -67,23 +67,23 @@ runs:
       id: restore_cache
       uses: actions/cache@v4.2.3
       with:
-        path: 'action/cache/docker'
+        path: '${{ github.action_path }}/cache/docker'
         key: '${{ runner.arch }}-cache-docker-homeassistant-${{ steps.init.outputs.tag }}'
 
     - name: Update image cache on cache miss
       if: steps.restore_cache.outputs.cache-hit != 'true'
       shell: bash
       run: >
-        docker pull "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}" 2>&1 >/dev/null
-        && mkdir -p $(dirname './action/cache/docker/${{ steps.init.outputs.tag }}.tar')
-        && docker image save 'ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}' \
-          --output './action/cache/docker/${{ steps.init.outputs.tag }}.tar'
+        docker pull "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}"
+        mkdir -p $(dirname '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar')
+        docker image save 'ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}' \
+          --output '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar'
 
     - name: Use image cache on cache hit
       if: steps.restore_cache.outputs.cache-hit == 'true'
       shell: bash
       run: >
-        docker image load --input './action/cache/docker/${{ steps.init.outputs.tag }}.tar'
+        docker image load --input '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar'
 
     - shell: bash
       run: |
