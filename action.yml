@@ -72,7 +72,7 @@ runs:
       if: steps.restore_cache.outputs.cache-hit != 'true'
       shell: bash
       run: |
-        docker pull "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}"
+        docker pull --quiet "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}"
         mkdir -p $(dirname '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar')
         docker image save 'ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}' \
           --output '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar'
