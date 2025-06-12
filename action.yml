@@ -73,7 +73,7 @@ runs:
     - name: Update image cache on cache miss
       if: steps.restore_cache.outputs.cache-hit != 'true'
       shell: bash
-      run: >
+      run: |
         docker pull "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}"
         mkdir -p $(dirname '${{ github.action_path }}/cache/docker/${{ steps.init.outputs.tag }}.tar')
         docker image save 'ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}' \
