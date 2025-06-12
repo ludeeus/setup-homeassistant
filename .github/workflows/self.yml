@@ -2,10 +2,10 @@ name: Self
 
 on:
   pull_request:
-    branches: 
+    branches:
     - main
   push:
-    branches: 
+    branches:
     - main
 
 jobs:
@@ -21,7 +21,28 @@ jobs:
         uses: ./
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
+  with-arm-runner:
+    name: With Arm runner
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+
+      - name: ✅ Verify API Access
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
@@ -51,7 +72,7 @@ jobs:
           config-dir: test_configuration
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
