@@ -31,26 +31,30 @@ runs:
   steps:
     - shell: bash
       id: init
+      env:
+        CONFIGURATION_DIR: ${{ inputs.config-dir }}
+        CONTAINER_TAG: ${{ inputs.tag }}
       run: |
         containername=$(python3 ${{ github.action_path }}/scripts/containername.py)
 
         mkdir ${{ github.action_path }}/combined_configuration
 
-        if [[ "${{ inputs.config-dir }}" != "" ]]; then
-          cp -r ${{ github.workspace }}/${{ inputs.config-dir }}/. ${{ github.action_path }}/combined_configuration
+        if [[ "${CONFIGURATION_DIR}" != "" ]]; then
+          echo "Using configuration from ${CONFIGURATION_DIR}"
+          cp -r ${{ github.workspace }}/${CONFIGURATION_DIR}/. ${{ github.action_path }}/combined_configuration
         fi
 
-        if [[ "${{ inputs.tag }}" == "dev" ]]; then
+        if [[ "${CONTAINER_TAG}" == "dev" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/dev.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/dev.json"
-        elif [[ "${{ inputs.tag }}" == "beta" ]]; then
+        elif [[ "${CONTAINER_TAG}" == "beta" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/beta.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/beta.json"
-        elif [[ "${{ inputs.tag }}" == "stable" ]]; then
+        elif [[ "${CONTAINER_TAG}" == "stable" ]]; then
           tag=$(curl -sSLf https://version.home-assistant.io/stable.json | jq .homeassistant.default -r)
           echo "Using $tag from https://version.home-assistant.io/stable.json"
         else
-          tag="${{ inputs.tag }}"
+          tag="${CONTAINER_TAG}"
         fi
 
         docker pull "ghcr.io/home-assistant/home-assistant:$tag" 2>&1 >/dev/null
@@ -80,6 +84,8 @@ runs:
           ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "hass --version -c /config"
 
+        ls -la ${{ github.action_path }}/combined_configuration
+
     - shell: bash
       id: user
       run: |
@@ -101,6 +107,8 @@ runs:
 
     - shell: bash
       id: run
+      env:
+        RETRY_LIMIT: ${{ inputs.retry-limit }}
       run: |
           BASE_URL="http://127.0.0.1:8123"
           echo "url=$BASE_URL" >> $GITHUB_OUTPUT
@@ -113,7 +121,7 @@ runs:
             STATUS=$(curl -sSL -H "Authorization: Bearer ${{ steps.user.outputs.token }}" "$BASE_URL/api/config" | jq -r .state)
             if [ "$STATUS" == "RUNNING" ]; then
               break
-            elif [ "$RETRIES" == "${{inputs.retry-limit}}" ]; then
+            elif [ "$RETRIES" == "${RETRY_LIMIT}" ]; then
               echo "Failed to start"
               docker logs ${{ steps.init.outputs.containername }}
               exit 1
