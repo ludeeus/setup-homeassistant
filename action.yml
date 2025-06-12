@@ -50,7 +50,7 @@ runs:
           tag="${{ inputs.tag }}"
         fi
 
-        docker pull "ghcr.io/home-assistant/homeassistant:$tag" 2>&1 >/dev/null
+        docker pull "ghcr.io/home-assistant/home-assistant:$tag" 2>&1 >/dev/null
 
         echo "tag=$tag" >> $GITHUB_OUTPUT
         echo "containername=$containername" >> $GITHUB_OUTPUT
@@ -62,19 +62,19 @@ runs:
         if [ ! -f /tmp/combined_configuration/configuration.yaml ]; then
           docker run --rm \
             -v /tmp/combined_configuration:/config \
-            ghcr.io/home-assistant/homeassistant:${{ steps.init.outputs.tag }} \
+            ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
             /bin/bash -c "pip install 'charset-normalizer<3,>=2'; hass --script ensure_config -c /config"
         fi
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          ghcr.io/home-assistant/homeassistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "pip install 'charset-normalizer<3,>=2'; hass --script check_config -c /config"
 
     - shell: bash
       run: |
         docker run --rm \
           -v /tmp/combined_configuration:/config \
-          ghcr.io/home-assistant/homeassistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           /bin/bash -c "pip install 'charset-normalizer<3,>=2'; hass --version -c /config"
 
     - shell: bash
@@ -84,7 +84,7 @@ runs:
         TOKEN=$(docker run --rm \
           -v /tmp/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
-          ghcr.io/home-assistant/homeassistant:${{ steps.init.outputs.tag }} \
+          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
           python3 /tmp/create_token.py)
         echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
@@ -94,7 +94,7 @@ runs:
           --network=host \
           --name ${{ steps.init.outputs.containername }} \
           -v /tmp/combined_configuration:/config \
-          ghcr.io/home-assistant/homeassistant:${{ steps.init.outputs.tag }}
+          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}
 
     - shell: bash
       id: run
