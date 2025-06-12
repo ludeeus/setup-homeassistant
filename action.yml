@@ -74,9 +74,9 @@ runs:
       if: steps.restore_cache.outputs.cache-hit != 'true'
       shell: bash
       run: >
-        docker pull "ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }}" 2>&1 >/dev/null
+        docker pull "ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}" 2>&1 >/dev/null
         && mkdir -p $(dirname './action/cache/docker/${{ steps.init.outputs.tag }}.tar')
-        && docker image save 'ghcr.io/home-assistant/amd64-homeassistant:${{ steps.init.outputs.tag }}' \
+        && docker image save 'ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}' \
           --output './action/cache/docker/${{ steps.init.outputs.tag }}.tar'
 
     - name: Use image cache on cache hit
