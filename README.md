@@ -31,6 +31,7 @@ input | description
 `tag` | This can be any valid tag for a `homeassistant/home-assistant` container, the default is `dev`.
 `config-dir` | Relative path to the configuration directory you want to use, defaults to the root of the repo.
 `retry-limit` | How many times/seconds the action will wait for Home Assistant to start before giving up, `360` is the default.
+`skip-pip` | Skip pip install of pip packages on startup, defaults to `false`.
 
 ## Full usage example
 
@@ -40,10 +41,10 @@ name: home-assistant-check
 
 on:
   pull_request:
-    branches: 
+    branches:
     - main
   push:
-    branches: 
+    branches:
     - main
 
 jobs:
@@ -68,7 +69,7 @@ jobs:
           config-dir: test_configuration
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \

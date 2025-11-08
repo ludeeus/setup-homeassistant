@@ -80,3 +80,26 @@ jobs:
 
       - name: 📜 Get logs
         run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
+  with-skip-pip:
+    name: With skip-pip
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+        with:
+          skip-pip: true
+
+      - name: ✅ Verify API Access
+        run: |
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}

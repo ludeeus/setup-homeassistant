@@ -16,6 +16,10 @@ inputs:
     description: 'number of maximum retries'
     required: false
     default: 360
+  skip-pip:
+    description: 'Skip pip install of required packages on startup'
+    required: false
+    default: 'false'
 outputs:
   url:
     description: "The URL that the test container is running on"
@@ -96,12 +100,20 @@ runs:
         echo "token=$TOKEN" >> $GITHUB_OUTPUT
 
     - shell: bash
+      env:
+        SKIP_PIP: ${{ inputs.skip-pip }}
       run: |
+        RUN_FLAGS=()
+        if [[ "${SKIP_PIP}" == "true" ]]; then
+          RUN_FLAGS+=(--skip-pip)
+        fi
+
         docker run -d \
           --network=host \
           --name ${{ steps.init.outputs.containername }} \
           -v ${{ github.action_path }}/combined_configuration:/config \
-          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }}
+          ghcr.io/home-assistant/home-assistant:${{ steps.init.outputs.tag }} \
+          "${RUN_FLAGS[@]}"
 
     - shell: bash
       id: run
