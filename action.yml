@@ -100,7 +100,6 @@ runs:
       id: user
       run: |
         echo "Creating authentication"
-         echo "Creating authentication"
         OUTPUT=$(docker run --rm \
           -v ${{ github.action_path }}/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/setup_ha.py:/tmp/setup_ha.py \
