@@ -2,11 +2,11 @@ name: Self
 
 on:
   pull_request:
-    branches: 
-    - main
+    branches:
+      - main
   push:
-    branches: 
-    - main
+    branches:
+      - main
 
 jobs:
   without-config-dir:
@@ -21,7 +21,64 @@ jobs:
         uses: ./
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
+  with-arm-runner:
+    name: With Arm runner
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+
+      - name: ✅ Verify API Access
+        run: |
+          curl -sSL -f -X GET \
+            -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
+            -H "Content-Type: application/json" \
+            ${{ steps.homeassistant.outputs.url }}/api/states
+
+      - name: 📜 Get logs
+        run: docker logs ${{ steps.homeassistant.outputs.containername }}
+
+  with-custom-credentials:
+    name: With custom username and password
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Check out the repository
+        uses: actions/checkout@v2
+
+      - name: 👷 Setup Home Assistant
+        id: homeassistant
+        uses: ./
+        with:
+          username: test_user
+          password: test_password_123
+
+      - name: ✅ Verify outputs are set correctly
+        run: |
+          if [ "${{ steps.homeassistant.outputs.username }}" != "test_user" ]; then
+            echo "Username mismatch: expected 'test_user', got '${{ steps.homeassistant.outputs.username }}'"
+            exit 1
+          fi
+          if [ "${{ steps.homeassistant.outputs.password }}" != "test_password_123" ]; then
+            echo "Password mismatch: expected 'test_password_123', got '${{ steps.homeassistant.outputs.password }}'"
+            exit 1
+          fi
+          echo "✅ Username and password outputs are correct"
+
+      - name: ✅ Verify API Access with token
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
@@ -51,7 +108,7 @@ jobs:
           config-dir: test_configuration
 
       - name: ✅ Verify API Access
-        run: | 
+        run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
