@@ -24,9 +24,9 @@ async def create_token():
         hass = HomeAssistant(CONFIG_DIR)
 
     # Starting with HA 2026.5 we need to setup the device registry before loading it.
-    setup = getattr(dr, "async_setup", None)
-    if setup is not None:
-        setup(hass)
+    dr_async_setup = getattr(dr, "async_setup", None)
+    if dr_async_setup is not None:
+        dr_async_setup(hass)
 
     await asyncio.gather(dr.async_load(hass), er.async_load(hass))
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
