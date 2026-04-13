@@ -1,6 +1,5 @@
 """Script to create LLAT for ludeeus/setup-homeassistant action."""
 import asyncio
-import contextlib
 from datetime import timedelta
 import logging
 import random
@@ -25,8 +24,9 @@ async def create_token():
         hass = HomeAssistant(CONFIG_DIR)
 
     # Starting with HA 2026.5 we need to setup the device registry before loading it.
-    with contextlib.suppress(AttributeError):
-        dr.async_setup(hass)
+    setup = getattr(dr, "async_setup", None)
+    if setup is not None:
+        setup(hass)
 
     await asyncio.gather(dr.async_load(hass), er.async_load(hass))
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
