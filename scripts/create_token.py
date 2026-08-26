@@ -13,9 +13,16 @@ from homeassistant.helpers import device_registry as dr, entity_registry as er
 
 CONFIG_DIR = "/config"
 
+# Home Assistant used to ship an event loop policy, but dropped it in favor of
+# configuring the running loop directly.
+LOOP_POLICY_REMOVED = hasattr(runner, "configure_event_loop")
+
 
 async def create_token():
     """Create token."""
+    if LOOP_POLICY_REMOVED:
+        runner.configure_event_loop(asyncio.get_running_loop())
+
     logging.getLogger("homeassistant").setLevel(logging.CRITICAL)
     try:
         hass = HomeAssistant()
@@ -58,5 +65,6 @@ async def create_token():
     await hass.async_stop()
 
 
-asyncio.set_event_loop_policy(runner.HassEventLoopPolicy(False))
+if not LOOP_POLICY_REMOVED:
+    asyncio.set_event_loop_policy(runner.HassEventLoopPolicy(False))
 asyncio.run(create_token())
