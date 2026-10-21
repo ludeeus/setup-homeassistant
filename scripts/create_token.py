@@ -45,7 +45,6 @@ async def create_token():
 
     await asyncio.gather(dr.async_load(hass), er.async_load(hass))
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
-    hass.auth._store._set_defaults()
     provider = hass.auth.auth_providers[0]
     await provider.async_initialize()
 
