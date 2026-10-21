@@ -58,7 +58,7 @@ jobs:
           - dev
     steps:
       - name: 📥 Check out the repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v7
 
       - name: 👷 Setup Home Assistant
         id: homeassistant
