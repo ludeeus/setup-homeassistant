@@ -5,9 +5,10 @@ import logging
 import random
 import string
 
-from homeassistant import runner
+from homeassistant import config_entries, runner
 from homeassistant.auth import auth_manager_from_config
 from homeassistant.auth.models import TOKEN_TYPE_LONG_LIVED_ACCESS_TOKEN
+from homeassistant.const import MAJOR_VERSION, MINOR_VERSION
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers import device_registry as dr, entity_registry as er
 
@@ -16,6 +17,9 @@ CONFIG_DIR = "/config"
 # Home Assistant used to ship an event loop policy, but dropped it in favor of
 # configuring the running loop directly.
 LOOP_POLICY_REMOVED = hasattr(runner, "configure_event_loop")
+
+# Starting with HA 2026.11 the entity registry waits for config entries to load.
+CONFIG_ENTRIES_REQUIRED = (MAJOR_VERSION, MINOR_VERSION) >= (2026, 11)
 
 
 async def create_token():
@@ -35,7 +39,11 @@ async def create_token():
     if dr_async_setup is not None:
         dr_async_setup(hass)
 
-    await asyncio.gather(dr.async_load(hass), er.async_load(hass))
+    loaders = [dr.async_load(hass), er.async_load(hass)]
+    if CONFIG_ENTRIES_REQUIRED:
+        hass.config_entries = config_entries.ConfigEntries(hass, {})
+        loaders.append(hass.config_entries.async_initialize())
+    await asyncio.gather(*loaders)
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
     hass.auth._store._set_defaults()
     provider = hass.auth.auth_providers[0]
