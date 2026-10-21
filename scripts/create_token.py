@@ -39,11 +39,11 @@ async def create_token():
     if dr_async_setup is not None:
         dr_async_setup(hass)
 
-    loaders = [dr.async_load(hass), er.async_load(hass)]
     if CONFIG_ENTRIES_REQUIRED:
         hass.config_entries = config_entries.ConfigEntries(hass, {})
-        loaders.append(hass.config_entries.async_initialize())
-    await asyncio.gather(*loaders)
+        await hass.config_entries.async_initialize()
+
+    await asyncio.gather(dr.async_load(hass), er.async_load(hass))
     hass.auth = await auth_manager_from_config(hass, [{"type": "homeassistant"}], [])
     hass.auth._store._set_defaults()
     provider = hass.auth.auth_providers[0]
