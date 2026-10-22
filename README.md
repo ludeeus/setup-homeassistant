@@ -9,7 +9,7 @@ During the run it will validate the configuration, and create a LLAT that can be
 ## Usage
 
 ```yaml
-- name: 👷 Setup Home Assistant
+- name: Set up Home Assistant
   id: homeassistant
   uses: ludeeus/setup-homeassistant@main
 ```
@@ -57,24 +57,24 @@ jobs:
           - beta
           - dev
     steps:
-      - name: 📥 Check out the repository
+      - name: Check out the repository
         uses: actions/checkout@v7
 
-      - name: 👷 Setup Home Assistant
+      - name: Set up Home Assistant
         id: homeassistant
         uses: ludeeus/setup-homeassistant@main
         with:
           tag: ${{ matrix.channel }}
           config-dir: test_configuration
 
-      - name: ✅ Verify API Access
+      - name: Verify API access
         run: | 
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
             ${{ steps.homeassistant.outputs.url }}/api/states
 
-      - name: 📜 Get logs
+      - name: Get logs
         run: docker logs ${{ steps.homeassistant.outputs.containername }}
 ```
 
