@@ -1,30 +1,30 @@
 name: 'setup-homeassistant'
-description: 'Setup a Home Assistant container for testing'
+description: "Set up a Home Assistant container for testing"
 branding:
   icon: "terminal"
   color: "gray-dark"
 inputs:
   tag:
-    description: 'The tag of Home Assistant to use'
+    description: "The Home Assistant tag to use"
     required: false
     default: 'dev'
   config-dir:
-    description: 'Path to the config dir to be used'
+    description: "Path to the configuration directory to use"
     required: false
     default: ''
   retry-limit:
-    description: 'number of maximum retries'
+    description: "Maximum number of retries"
     required: false
     default: 360
 outputs:
   url:
-    description: "The URL that the test container is running on"
+    description: "The URL the test container is running on"
     value: ${{ steps.run.outputs.url }}
   containername:
-    description: "The container name for the running container"
+    description: "The name of the running container"
     value: ${{ steps.init.outputs.containername }}
   token:
-    description: "A LLAT that can be used for authentication"
+    description: "A long-lived access token for authentication"
     value: ${{ steps.user.outputs.token }}
 runs:
   using: "composite"
@@ -87,7 +87,7 @@ runs:
     - shell: bash
       id: user
       run: |
-        echo "Creating authentication"
+        echo "Creating an access token"
         TOKEN=$(docker run --rm \
           -v ${{ github.action_path }}/combined_configuration:/config \
           -v ${{ github.action_path }}/scripts/create_token.py:/tmp/create_token.py \
@@ -120,7 +120,7 @@ runs:
             if [ "$STATUS" == "RUNNING" ]; then
               break
             elif [ "$RETRIES" == "${RETRY_LIMIT}" ]; then
-              echo "Failed to start"
+              echo "Home Assistant failed to start"
               docker logs ${{ steps.init.outputs.containername }}
               exit 1
             fi

@@ -3,6 +3,6 @@ sort-direction: ascending
 exclude-labels:
   - "release-drafter-ignore"
 template: |
-  ## What’s Changed
+  ## What's changed
 
   $CHANGES

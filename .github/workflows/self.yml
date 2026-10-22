@@ -13,42 +13,42 @@ jobs:
     name: Without config-dir
     runs-on: ubuntu-26.04
     steps:
-      - name: 📥 Check out the repository
+      - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: 👷 Setup Home Assistant
+      - name: Set up Home Assistant
         id: homeassistant
         uses: ./
 
-      - name: ✅ Verify API Access
+      - name: Verify API access
         run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
             ${{ steps.homeassistant.outputs.url }}/api/states
 
-      - name: 📜 Get logs
+      - name: Get logs
         run: docker logs ${{ steps.homeassistant.outputs.containername }}
 
   with-arm-runner:
     name: With Arm runner
     runs-on: ubuntu-24.04-arm
     steps:
-      - name: 📥 Check out the repository
+      - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: 👷 Setup Home Assistant
+      - name: Set up Home Assistant
         id: homeassistant
         uses: ./
 
-      - name: ✅ Verify API Access
+      - name: Verify API access
         run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
             ${{ steps.homeassistant.outputs.url }}/api/states
 
-      - name: 📜 Get logs
+      - name: Get logs
         run: docker logs ${{ steps.homeassistant.outputs.containername }}
 
   with-config-dir:
@@ -61,22 +61,22 @@ jobs:
           - beta
           - dev
     steps:
-      - name: 📥 Check out the repository
+      - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: 👷 Setup Home Assistant
+      - name: Set up Home Assistant
         id: homeassistant
         uses: ./
         with:
           tag: ${{ matrix.channel }}
           config-dir: test_configuration
 
-      - name: ✅ Verify API Access
+      - name: Verify API access
         run: |
           curl -sSL -f -X GET \
             -H "Authorization: Bearer ${{ steps.homeassistant.outputs.token }}" \
             -H "Content-Type: application/json" \
             ${{ steps.homeassistant.outputs.url }}/api/states
 
-      - name: 📜 Get logs
+      - name: Get logs
         run: docker logs ${{ steps.homeassistant.outputs.containername }}

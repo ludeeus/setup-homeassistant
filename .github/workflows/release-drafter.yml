@@ -10,12 +10,12 @@ jobs:
     runs-on: ubuntu-26.04
     name: Release Drafter
     steps:
-      - name: Checkout the repository
+      - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 0
 
-      - name: Find Next Version
+      - name: Find next version
         id: version
         run: |
           declare -i newpost
